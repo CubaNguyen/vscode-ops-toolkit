@@ -4,7 +4,7 @@ An IDE-native DevOps toolkit for monitoring and debugging Docker/Linux staging e
 
 ## ✨ Features
 
-- **Real-time log formatter** — Serilog (JSON), Nginx access/error, Docker stats, `ps aux` with color-coded levels and highlighted IDs
+- **Real-time log formatter** — Serilog (JSON), Nginx access/error, Docker stats, `ps aux` with color-coded levels and highlighted IDs (each unique ID gets its own color)
 - **One-click SSH tasks** — Docker logs, service restart, shell access, Nginx config, Linux diagnostics via VS Code Task Explorer
 - **Monitoring agent** — Single SSH connection per tick, monitors 20+ services: up/down, CPU/RAM, disk, Nginx 5xx, log errors — Windows toast + beep alerts
 - **Auto-sync service list** — Pull live container list from server, filter blacklist, update task dropdown automatically
@@ -12,14 +12,14 @@ An IDE-native DevOps toolkit for monitoring and debugging Docker/Linux staging e
 ## 📋 Requirements
 
 - VS Code
-- SSH access to your Linux server
-- Python 3 on the server (`/usr/bin/python3`)
-- Extension: [Task Explorer](https://marketplace.visualstudio.com/items?itemName=spmeesseman.vscode-taskexplorer) (spmeesseman)
-- Windows (for `alert.ps1` toast notifications)
+- SSH access to a Linux server
+- Python 3 on the server
+- Windows (alert.ps1 uses PowerShell + Windows toast notifications)
+- VS Code extension: [Task Explorer](https://marketplace.visualstudio.com/items?itemName=spmeesseman.vscode-taskexplorer) by spmeesseman
 
 ---
 
-## 🚀 Setup
+## 🚀 Setup (First time)
 
 ### 1. Clone repo
 
@@ -28,57 +28,55 @@ git clone https://github.com/YOUR_USERNAME/vscode-ops-toolkit
 cd vscode-ops-toolkit
 ```
 
-### 2. Configure your server
+### 2. Run setup script
 
-Edit the following files and replace `YOUR_SERVER` with your SSH host alias:
-
-**`.vscode/tasks.json`** — search and replace `YOUR_SERVER`
-
-**`docker/alert.ps1`** — line 2:
 ```powershell
-[string]$server = "YOUR_SERVER",
+powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
-**`sync-services.ps1`** — line 4:
-```powershell
-$SSH_HOST = "YOUR_SERVER"
-```
+The script will:
 
-### 3. Configure SSH
+- Ask for your SSH host alias, server IP, user, and key filename
+- Replace `YOUR_SERVER` placeholder in all config files automatically
+- Add SSH config entry to `~/.ssh/config`
+- Fix SSH key permissions (required on Windows)
+- Test SSH connection
 
-Add to `~/.ssh/config`:
-```
-Host YOUR_SERVER
-    HostName YOUR_SERVER_IP
-    IdentityFile ~/.ssh/your-key.pem
-    User ubuntu
-```
-
-Fix key permission on Windows (required):
-```powershell
-icacls "$env:USERPROFILE\.ssh\your-key.pem" /inheritance:r /grant:r "$env:USERNAME:R"
-```
-
-Test:
-```bash
-ssh YOUR_SERVER
-```
-
-### 4. Install Task Explorer
+### 3. Install Task Explorer
 
 `Ctrl+Shift+X` → search **Task Explorer** (spmeesseman) → Install
 
+### 4. Reload VS Code
+
+`Ctrl+Shift+P` → **Reload Window**
+
+Sidebar will show Task Explorer panel with task tree.
+
 ### 5. Upload scripts to server
 
-Open Task Explorer sidebar → **🔄 Setup: Upload all scripts to server**
+Task Explorer → **🔄 Setup: Upload all scripts to server**
 
-This uploads `dlog.py`, `dinspect.py`, `logsearch.py` to `/tmp/` on the server.
+Uploads `dlog.py`, `dinspect.py`, `logsearch.py` to `/tmp/` on the server.
+
+Output should show:
+
+```
+dlog.py        100%  ...
+dinspect.py    100%  ...
+logsearch.py   100%  ...
+```
 
 ### 6. Sync service list
 
-Run **🔄 Setup: Sync service list** → pulls live container list from server → updates dropdown in `tasks.json`
+Task Explorer → **🔄 Setup: Sync service list**
 
-Then `Ctrl+Shift+P` → **Reload Window**
+Pulls live container list from server, filters blacklist, updates dropdown in `tasks.json`.
+
+Then `Ctrl+Shift+P` → **Reload Window** again.
+
+### ✅ Verify setup
+
+Run task **🐧 Linux: Who is logged in** — if it shows your SSH username, everything is working.
 
 ---
 
@@ -139,7 +137,9 @@ Then `Ctrl+Shift+P` → **Reload Window**
 
 ---
 
-## ➕ Adding a new task
+## ➕ How to extend
+
+### Add a new task
 
 Open `.vscode/tasks.json`, add to the `tasks` array:
 
@@ -148,55 +148,78 @@ Open `.vscode/tasks.json`, add to the `tasks` array:
   "label": "🐳 Docker: Logs: Last 24 hours",
   "type": "shell",
   "command": "ssh",
-  "args": ["YOUR_SERVER", "docker logs ${input:service} --since 24h | python3 -u /tmp/dlog.py"],
+  "args": [
+    "YOUR_SERVER",
+    "docker logs ${input:service} --since 24h | python3 -u /tmp/dlog.py"
+  ],
   "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
   "problemMatcher": []
 }
 ```
 
-Label format: `<emoji> <Group>: <Subgroup>: <Name>` — Task Explorer auto-creates folders from the `:` separator.
+Label format: `<emoji> <Group>: <Subgroup>: <Name>`
 
----
+Task Explorer auto-creates folders from the `:` separator. No other config needed.
 
-## ➕ Adding a new service to blacklist
+### Add a new task group
+
+Just use a new prefix in the label:
+
+```json
+{ "label": "☁️ AWS: List S3 buckets", ... }
+{ "label": "☁️ AWS: Check ECS services", ... }
+```
+
+This auto-creates an `AWS` folder in Task Explorer.
+
+### Add a service to blacklist
 
 Edit `services.json`:
 
 ```json
 {
-  "blacklist": [
-    "kibana",
-    "your-new-service-to-exclude"
-  ]
+  "blacklist": ["kibana", "your-infra-service"]
 }
 ```
 
-Then run **🔄 Setup: Sync service list** to update the dropdown.
+Then run **🔄 Setup: Sync service list**.
 
----
-
-## 🔧 Customizing alert thresholds
-
-Run **🚨 Alert: Start monitoring** with custom params:
+### Customize alert thresholds
 
 ```powershell
-# In terminal
 powershell -File docker/alert.ps1 -cpuThreshold 70 -memThreshold 75 -diskThreshold 80 -interval 60
 ```
 
-Default thresholds: CPU > 80%, RAM > 80%, Disk > 85%, check every 30s.
+Default: CPU > 80%, RAM > 80%, Disk > 85%, every 30s.
+
+---
+
+## 🔄 Updating scripts on server
+
+After editing `dlog.py`, `dinspect.py`, or `logsearch.py`:
+
+Task Explorer → **🔄 Setup: Upload all scripts to server**
+
+Or manually:
+
+```bash
+scp docker/dlog.py docker/dinspect.py docker/logsearch.py YOUR_SERVER:/tmp/
+```
+
+After pulling new version from git, run upload again to keep server in sync.
 
 ---
 
 ## 🔧 Troubleshooting
 
-| Problem | Fix |
-|---|---|
-| `Permission denied` SSH | Run `icacls` command in step 3 |
-| Task Explorer shows flat list | Check `.vscode/settings.json` has `groupWithSeparator: true` and `groupSeparator: ":"`, then click refresh |
-| Log has no color | Run **Setup: Upload all scripts** |
-| `Could not resolve hostname` | Check `~/.ssh/config` host alias matches `YOUR_SERVER` in tasks |
-| Alert not detecting errors | Logs must be Serilog JSON format with `"@l":"Error"` field |
+| Problem                                     | Fix                                                                                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Permission denied` on SSH                  | Run `setup.ps1` again, or manually run `icacls` on your key file                                                                  |
+| Task Explorer shows flat list               | Check `.vscode/settings.json` has `groupWithSeparator: true` and `groupSeparator: ":"`, click refresh (🔄) in Task Explorer panel |
+| Log has no color                            | Run **Setup: Upload all scripts to server**                                                                                       |
+| `Could not resolve hostname`                | SSH alias in `~/.ssh/config` doesn't match what's in `tasks.json`. Run `setup.ps1` again                                          |
+| Alert not detecting log errors              | Service must use Serilog JSON format with `"@l":"Error"` field                                                                    |
+| Sync service list includes infra containers | Add them to `blacklist` in `services.json`                                                                                        |
 
 ---
 
@@ -205,29 +228,17 @@ Default thresholds: CPU > 80%, RAM > 80%, Disk > 85%, check every 30s.
 ```
 vscode-ops-toolkit/
 ├── docker/
-│   ├── dlog.py         # Log formatter: Serilog, Nginx, Docker stats, ps aux
-│   ├── dinspect.py     # docker inspect formatter
-│   ├── logsearch.py    # Keyword search in container logs
-│   └── alert.ps1       # Monitoring agent (Windows, PowerShell)
+│   ├── dlog.py           # Log formatter: Serilog, Nginx, Docker stats, ps aux
+│   ├── dinspect.py       # docker inspect formatter
+│   ├── logsearch.py      # Keyword search in container logs
+│   └── alert.ps1         # Monitoring agent (Windows PowerShell)
 ├── .vscode/
-│   ├── tasks.json      # All task definitions
-│   └── settings.json   # Task Explorer grouping config
-├── sync-services.ps1   # Auto-sync service list from server
-├── services.json       # Blacklist config
+│   ├── tasks.json        # All task definitions
+│   └── settings.json     # Task Explorer grouping config
+├── setup.ps1             # First-time setup script
+├── sync-services.ps1     # Auto-sync service list from server
+├── services.json         # Blacklist config
 └── README.md
-```
-
----
-
-## 🔄 Updating
-
-When scripts are updated, re-upload to server:
-
-**Task Explorer → 🔄 Setup: Upload all scripts to server**
-
-Or manually:
-```bash
-scp docker/dlog.py docker/dinspect.py docker/logsearch.py YOUR_SERVER:/tmp/
 ```
 
 ---
