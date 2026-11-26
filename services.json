@@ -1,0 +1,11 @@
+{
+  "blacklist": [
+    "kibana",
+    "postgres-db",
+    "vcc-redis",
+    "elasticsearch",
+    "broker",
+    "cronicle",
+    "mattermost-app"
+  ]
+}

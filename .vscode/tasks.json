@@ -1,0 +1,574 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🐳 Docker: Logs: View service",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker logs ${input:service} -f --tail 200 | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Logs: View any (type name)",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker logs ${input:anycontainer} -f --tail 200 | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Logs: Last 2 hours",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker logs ${input:service} --since 2h | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Logs: Errors only",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker logs ${input:service} --tail 500 2>&1 | grep -a '@l' | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Logs: Search keyword",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker logs ${input:service} --tail 1000 2>&1 | python3 -u /tmp/logsearch.py ${input:keyword}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Service: Restart",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker restart ${input:service}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Service: Shell into container",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "-t",
+        "YOUR_SERVER",
+        "docker exec -it ${input:service} sh"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Server: CPU/RAM snapshot",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker stats --no-stream | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Server: CPU/RAM realtime",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker stats | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Server: Disk usage",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "df -h | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Debug: Check all container status",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker ps -a --format 'table {{.Names}}\\t{{.Status}}\\t{{.RunningFor}}'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Debug: Inspect container",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker inspect ${input:anycontainer} | python3 /tmp/dinspect.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Docker: Debug: Kill stuck container",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker kill ${input:anycontainer}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: List all sites",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "ls -la /etc/nginx/sites-enabled/"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: View site config",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "cat /etc/nginx/sites-enabled/${input:site}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: Test config",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "nginx -t 2>&1"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: Backup config",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "cp -r /etc/nginx /etc/nginx.bak.$(date +%Y%m%d_%H%M%S) && echo Backup done!"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: Reload",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "nginx -t 2>&1 && nginx -s reload && echo Reloaded!"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: Error log realtime",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "tail -f /var/log/nginx/error.log | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: Access log realtime",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "tail -f /var/log/nginx/access.log | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Nginx: Access log 4xx 5xx only",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "tail -f /var/log/nginx/access.log | python3 -u /tmp/dlog.py --only-errors"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Network: Ping between services",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker exec ${input:service} ping -c 3 ${input:target}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🌐 Network: Check port open",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "docker exec ${input:service} nc -zv ${input:target} ${input:port} 2>&1"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: System overview",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "echo '=== CPU ===' && uptime && echo '=== RAM ===' && free -h && echo '=== DISK ===' && df -h / && echo '=== LOAD ===' && cat /proc/loadavg | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: Top processes (CPU)",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "ps aux --sort=-%cpu | head -20 | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: Top processes (RAM)",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "ps aux --sort=-%mem | head -20 | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: Check open ports",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "ss -tlnp | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: Suspicious processes",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "ps aux | grep -v -E 'docker|nginx|postgres|redis|kafka|python|node|java|root|ubuntu' | grep -v grep | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: System log",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "tail -f /var/log/syslog | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: Auth log (login attempts)",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "tail -100 /var/log/auth.log | grep -E 'Failed|Accepted|Invalid' | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: Who is logged in",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "w"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐧 Linux: Network connections",
+      "type": "shell",
+      "command": "ssh",
+      "args": [
+        "YOUR_SERVER",
+        "ss -tnp | head -30 | python3 -u /tmp/dlog.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚨 Alert: Start monitoring",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/docker/alert.ps1"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔄 Setup: Sync service list",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/sync-services.ps1"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔄 Setup: Upload all scripts to server",
+      "type": "shell",
+      "command": "scp",
+      "args": [
+        "${workspaceFolder}/docker/dlog.py",
+        "${workspaceFolder}/docker/dinspect.py",
+        "${workspaceFolder}/docker/logsearch.py",
+        "YOUR_SERVER:/tmp/"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "service",
+      "type": "pickString",
+      "description": "Pick a service (run Setup: Sync service list to auto-populate)",
+      "options": [
+        "your-service-1",
+        "your-service-2",
+        "your-service-3"
+      ]
+    },
+    {
+      "id": "anycontainer",
+      "type": "promptString",
+      "description": "Enter container name or ID"
+    },
+    {
+      "id": "keyword",
+      "type": "promptString",
+      "description": "Search keyword or correlationId"
+    },
+    {
+      "id": "site",
+      "type": "promptString",
+      "description": "Enter nginx site name"
+    },
+    {
+      "id": "target",
+      "type": "promptString",
+      "description": "Target service name or IP"
+    },
+    {
+      "id": "port",
+      "type": "promptString",
+      "description": "Port number"
+    }
+  ]
+}
